@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayLedger - Employee Payroll Management System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-payslip-area, #printable-payslip-area * {
+        visibility: visible;
+      }
+      #printable-payslip-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: #000 !important;
+        background: #fff !important;
+        padding: 20px;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP HEADER / NAVBAR -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl font-bold">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-white">Pay<span class="text-sky-400">Ledger</span></span>
+            <span class="block text-xs text-slate-400 font-medium">CSE Mini Project System</span>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="hidden md:flex space-x-1">
+          <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn text-sky-400 bg-slate-800 px-3 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
+          </button>
+          <button onclick="switchTab('employees')" id="nav-employees" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-users"></i> Employees
+          </button>
+          <button onclick="switchTab('payroll')" id="nav-payroll" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-calculator"></i> Run Payroll
+          </button>
+          <button onclick="switchTab('datastructures')" id="nav-datastructures" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-diagram-project"></i> Linked List Engine
+          </button>
+          <button onclick="switchTab('database')" id="nav-database" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-database"></i> MySQL Database
+          </button>
+          <button onclick="switchTab('payslip')" id="nav-payslip" class="nav-btn text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Payslip
+          </button>
+        </nav>
+
+        <!-- Admin Badge -->
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Admin Online
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print">
+
+    <!-- 1. DASHBOARD TAB -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold text-white">System Dashboard</h1>
+          <p class="text-sm text-slate-400">Overview of active workforce, total payroll disbursements, and algorithm status.</p>
+        </div>
+        <button onclick="seedSampleData()" class="bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-arrows-rotate"></i> Reset / Seed Demo Data
+        </button>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Headcount</span>
+            <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
+              <i class="fa-solid fa-user-group"></i>
+            </div>
+          </div>
+          <div id="kpi-headcount" class="text-3xl font-extrabold text-white">0</div>
+          <span class="text-xs text-sky-400 font-medium">Stored in Linked List nodes</span>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Gross Payroll</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+              <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+          </div>
+          <div id="kpi-gross" class="text-3xl font-extrabold text-white">₹0</div>
+          <span class="text-xs text-emerald-400 font-medium">Basic + Allowances + Overtime</span>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Deductions</span>
+            <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+              <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+          </div>
+          <div id="kpi-deductions" class="text-3xl font-extrabold text-white">₹0</div>
+          <span class="text-xs text-rose-400 font-medium">PF + Prof Tax + TDS</span>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Payable</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+              <i class="fa-solid fa-vault"></i>
+            </div>
+          </div>
+          <div id="kpi-net" class="text-3xl font-extrabold text-white">₹0</div>
+          <span class="text-xs text-indigo-400 font-medium">Disbursable to accounts</span>
+        </div>
+      </div>
+
+      <!-- Quick Summary Table -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+          <h2 class="font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-sky-400"></i> Active Employee Roster
+          </h2>
+          <button onclick="switchTab('employees')" class="text-xs font-semibold text-sky-400 hover:text-sky-300">
+            Manage Employees &rarr;
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 text-xs uppercase font-semibold">
+              <tr>
+                <th class="px-4 py-3">Emp ID</th>
+                <th class="px-4 py-3">Full Name</th>
+                <th class="px-4 py-3">Designation</th>
+                <th class="px-4 py-3">Department</th>
+                <th class="px-4 py-3">Monthly Basic</th>
+                <th class="px-4 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-employee-table" class="divide-y divide-slate-800">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. EMPLOYEES MANAGEMENT TAB -->
+    <section id="tab-employees" class="tab-content hidden space-y-6">
+      <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Employee Directory</h1>
+          <p class="text-sm text-slate-400">Add, view, and remove employee records stored dynamically in Linked List nodes.</p>
+        </div>
+        <button onclick="toggleEmployeeModal()" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-user-plus"></i> Add New Employee
+        </button>
+      </div>
+
+      <!-- Employee List Container -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
+        <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+          <input type="text" id="employee-search-input" onkeyup="filterEmployees()" placeholder="Search employee by name or ID..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-500 w-64">
+          <span id="employee-count-badge" class="text-xs text-slate-400">Showing 0 employees</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-300">
+            <thead class="bg-slate-950 text-slate-400 text-xs uppercase font-semibold">
+              <tr>
+                <th class="px-4 py-3">Emp ID</th>
+                <th class="px-4 py-3">Name</th>
+                <th class="px-4 py-3">Designation</th>
+                <th class="px-4 py-3">Department</th>
+                <th class="px-4 py-3">Basic Salary</th>
+                <th class="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="full-employee-table" class="divide-y divide-slate-800">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RUN PAYROLL TAB -->
+    <section id="tab-payroll" class="tab-content hidden space-y-6">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Payroll Engine</h1>
+        <p class="text-sm text-slate-400">Calculate pro-rated salary, allowances, PF, Professional Tax, and Income Tax TDS.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Input Form -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-4">
+          <h2 class="font-bold text-white text-lg flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-sky-400"></i> Select &amp; Input
+          </h2>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Select Employee</label>
+            <select id="payroll-emp-select" onchange="calculatePayrollPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+              <!-- Options populated dynamically -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Days Worked (out of 30)</label>
+            <input type="number" id="payroll-days" value="30" min="0" max="30" oninput="calculatePayrollPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Overtime Hours</label>
+            <input type="number" id="payroll-overtime" value="5" min="0" oninput="calculatePayrollPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+          </div>
+
+          <button onclick="savePayrollRecord()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-check"></i> Process &amp; Commit Payroll
+          </button>
+        </div>
+
+        <!-- Real-time Calculation Breakdown Card -->
+        <div class="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-xl p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+              <h2 class="font-bold text-white text-lg flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-emerald-400"></i> Real-time Breakdown
+              </h2>
+              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20">Active Formulas Applied</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Gross Earnings Breakdown -->
+              <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800 space-y-2">
+                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Earnings</h3>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">Pro-Rated Basic:</span>
+                  <span id="calc-basic" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">HRA (40% Basic):</span>
+                  <span id="calc-hra" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">DA (10% Basic):</span>
+                  <span id="calc-da" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">Overtime Pay (2x rate):</span>
+                  <span id="calc-ot" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="border-t border-slate-800 pt-2 flex justify-between text-sm font-bold">
+                  <span class="text-emerald-400">Gross Earnings:</span>
+                  <span id="calc-gross" class="mono text-emerald-400">₹0.00</span>
+                </div>
+              </div>
+
+              <!-- Deductions Breakdown -->
+              <div class="bg-slate-950/60 p-4 rounded-lg border border-slate-800 space-y-2">
+                <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">Deductions</h3>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">Provident Fund (12%):</span>
+                  <span id="calc-pf" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">Professional Tax:</span>
+                  <span id="calc-ptax" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">Income Tax (TDS):</span>
+                  <span id="calc-tds" class="mono text-white font-semibold">₹0.00</span>
+                </div>
+                <div class="border-t border-slate-800 pt-2 flex justify-between text-sm font-bold mt-6">
+                  <span class="text-rose-400">Total Deductions:</span>
+                  <span id="calc-deductions" class="mono text-rose-400">₹0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Pay Banner -->
+          <div class="mt-6 bg-sky-950/60 border border-sky-500/30 rounded-xl p-4 flex justify-between items-center">
+            <div>
+              <span class="text-xs uppercase text-sky-400 font-bold block">Final Take-Home Salary</span>
+              <span class="text-xs text-slate-400">Net Pay = Gross Earnings - Total Deductions</span>
+            </div>
+            <div id="calc-net" class="mono text-3xl font-extrabold text-sky-400">
+              ₹0.00
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. LINKED LIST & SORTING DATA STRUCTURE ENGINE TAB -->
+    <section id="tab-datastructures" class="tab-content hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Data Structure Engine</h1>
+          <p class="text-sm text-slate-400">In-memory Singly Linked List dynamic node structure &amp; Merge/Quick Sort algorithm engine.</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="sortLinkedList('net_pay')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-down-9-1"></i> Sort by Net Pay (O(N log N))
+          </button>
+          <button onclick="sortLinkedList('emp_id')" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-down-1-9"></i> Sort by Emp ID
+          </button>
+        </div>
+      </div>
+
+      <!-- Algorithm Details Banner -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-wrap gap-4 justify-between items-center text-xs">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 font-bold rounded">DS: Singly Linked List</span>
+          <span class="text-slate-400">Dynamic node memory allocation with O(1) head insertion</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold rounded">Algorithm: Merge Sort</span>
+          <span class="text-slate-400">Average &amp; Worst Time Complexity: O(N log N)</span>
+        </div>
+      </div>
+
+      <!-- Linked List Node Visualizer -->
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-6">
+        <h2 class="font-bold text-white text-sm mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-diagram-project text-sky-400"></i> Linked List Nodes in Memory
+        </h2>
+
+        <div id="linked-list-nodes-container" class="flex flex-wrap items-center gap-4 overflow-x-auto py-4">
+          <!-- Dynamic Nodes Rendered Here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MYSQL DATABASE SIMULATOR TAB -->
+    <section id="tab-database" class="tab-content hidden space-y-6">
+      <div>
+        <h1 class="text-2xl font-bold text-white">MySQL Database Schema</h1>
+        <p class="text-sm text-slate-400">Relational persistence store (`payroll_db`) with `employees` and `payroll_records` tables.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Table 1: employees -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
+          <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
+            <span class="mono text-xs font-bold text-sky-400 flex items-center gap-2">
+              <i class="fa-solid fa-table"></i> TABLE: employees
+            </span>
+            <span class="text-xs text-slate-500">PRIMARY KEY: emp_id</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase font-semibold">
+                <tr>
+                  <th class="px-3 py-2">emp_id (INT)</th>
+                  <th class="px-3 py-2">emp_name (VARCHAR)</th>
+                  <th class="px-3 py-2">designation</th>
+                  <th class="px-3 py-2">basic_salary (DECIMAL)</th>
+                </tr>
+              </thead>
+              <tbody id="db-table-employees" class="divide-y divide-slate-800 mono">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Table 2: payroll_records -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl overflow-hidden">
+          <div class="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
+            <span class="mono text-xs font-bold text-emerald-400 flex items-center gap-2">
+              <i class="fa-solid fa-table"></i> TABLE: payroll_records
+            </span>
+            <span class="text-xs text-slate-500">FOREIGN KEY: emp_id</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase font-semibold">
+                <tr>
+                  <th class="px-3 py-2">payroll_id</th>
+                  <th class="px-3 py-2">emp_id</th>
+                  <th class="px-3 py-2">gross_pay</th>
+                  <th class="px-3 py-2">deductions</th>
+                  <th class="px-3 py-2">net_pay</th>
+                </tr>
+              </thead>
+              <tbody id="db-table-payroll" class="divide-y divide-slate-800 mono">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SQL Console Execution Log -->
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+        <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-2 mb-3">
+          <span class="font-bold uppercase text-sky-400 flex items-center gap-2">
+            <i class="fa-solid fa-terminal"></i> MySQL Query Execution Console
+          </span>
+          <span>Database Driver: Active Connected</span>
+        </div>
+        <div id="sql-log" class="mono text-xs space-y-1.5 text-emerald-400 max-h-40 overflow-y-auto">
+          <!-- SQL log statements -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. PAYSLIP GENERATOR TAB -->
+    <section id="tab-payslip" class="tab-content hidden space-y-6">
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Itemized Payslip</h1>
+          <p class="text-sm text-slate-400">Generate A4 printable monthly salary statements for employees.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select id="payslip-record-select" onchange="renderPayslip()" class="bg-slate-900 border border-slate-800 text-xs text-white rounded-lg px-3 py-2 focus:outline-none">
+            <!-- Populated -->
+          </select>
+          <button onclick="window.print()" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs px-4 py-2 rounded-lg transition flex items-center gap-2">
+            <i class="fa-solid fa-print"></i> Print Payslip (A4)
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Payslip Card -->
+      <div id="printable-payslip-area" class="bg-white text-slate-900 rounded-2xl p-8 border border-slate-200 shadow-xl max-w-4xl mx-auto">
+        <!-- Payslip Header -->
+        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-6">
+          <div>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">PAYLEDGER ENTERPRISES LTD.</h1>
+            <p class="text-xs text-slate-600">Software Solutions &amp; Engineering Hub</p>
+            <p class="text-xs text-slate-600">Payroll Statement for Month: <span id="ps-month" class="font-bold">October 2026</span></p>
+          </div>
+          <div class="text-right">
+            <span class="bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded uppercase tracking-wider">Official Payslip</span>
+            <p id="ps-id" class="text-xs font-mono font-bold text-slate-700 mt-2">PAYSLIP ID: #PAY-1001</p>
+          </div>
+        </div>
+
+        <!-- Employee Info Grid -->
+        <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+          <div>
+            <p class="text-slate-500 font-semibold uppercase">Employee Name</p>
+            <p id="ps-emp-name" class="font-bold text-slate-900 text-sm">--</p>
+          </div>
+          <div>
+            <p class="text-slate-500 font-semibold uppercase">Employee ID</p>
+            <p id="ps-emp-id" class="font-bold text-slate-900 text-sm">--</p>
+          </div>
+          <div>
+            <p class="text-slate-500 font-semibold uppercase">Designation</p>
+            <p id="ps-emp-desig" class="font-bold text-slate-900">--</p>
+          </div>
+          <div>
+            <p class="text-slate-500 font-semibold uppercase">Department</p>
+            <p id="ps-emp-dept" class="font-bold text-slate-900">--</p>
+          </div>
+        </div>
+
+        <!-- Earnings & Deductions Table -->
+        <div class="grid grid-cols-2 gap-6 mb-6">
+          <!-- Earnings -->
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-2 mb-3">Earnings</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between"><span class="text-slate-600">Basic Salary</span><span id="ps-basic" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between"><span class="text-slate-600">House Rent Allowance (HRA)</span><span id="ps-hra" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between"><span class="text-slate-600">Dearness Allowance (DA)</span><span id="ps-da" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between"><span class="text-slate-600">Overtime Earnings</span><span id="ps-ot" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between font-bold text-sm border-t border-slate-200 pt-2 text-slate-900"><span>Total Gross</span><span id="ps-gross" class="font-mono">₹0.00</span></div>
+            </div>
+          </div>
+
+          <!-- Deductions -->
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-2 mb-3">Deductions</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between"><span class="text-slate-600">Provident Fund (PF)</span><span id="ps-pf" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between"><span class="text-slate-600">Professional Tax</span><span id="ps-ptax" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between"><span class="text-slate-600">Income Tax (TDS)</span><span id="ps-tds" class="font-mono font-semibold">₹0.00</span></div>
+              <div class="flex justify-between font-bold text-sm border-t border-slate-200 pt-2 text-rose-700"><span>Total Deductions</span><span id="ps-deductions" class="font-mono">₹0.00</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Net Salary Total Box -->
+        <div class="bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center mb-8">
+          <div>
+            <span class="text-xs uppercase font-bold text-slate-400">Net Payable Amount</span>
+            <span id="ps-net-words" class="block text-xs text-sky-300 font-medium italic mt-0.5">--</span>
+          </div>
+          <div id="ps-net-amount" class="text-2xl font-extrabold font-mono text-sky-400">
+            ₹0.00
+          </div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="flex justify-between items-end pt-8 text-xs text-slate-500">
+          <div>
+            <p class="font-semibold text-slate-900">Employer Signature</p>
+            <p>PayLedger HR Dept</p>
+          </div>
+          <div class="text-right">
+            <p class="font-semibold text-slate-900">Employee Signature</p>
+            <p>Acknowledgement</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ADD EMPLOYEE MODAL -->
+  <div id="employee-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-lg flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-sky-400"></i> Add New Employee
+        </h3>
+        <button onclick="toggleEmployeeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Employee ID</label>
+          <input type="number" id="form-emp-id" placeholder="e.g. 104" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Full Name</label>
+          <input type="text" id="form-emp-name" placeholder="e.g. Rajesh Kumar" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Designation</label>
+          <input type="text" id="form-emp-desig" placeholder="e.g. Software Engineer" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Department</label>
+          <select id="form-emp-dept" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+            <option value="Engineering">Engineering</option>
+            <option value="Human Resources">Human Resources</option>
+            <option value="Finance">Finance</option>
+            <option value="Operations">Operations</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Monthly Basic Salary (₹)</label>
+          <input type="number" id="form-emp-basic" placeholder="e.g. 45000" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+        </div>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button onclick="toggleEmployeeModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold py-2.5 rounded-lg transition">Cancel</button>
+        <button onclick="saveEmployee()" class="flex-1 bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold py-2.5 rounded-lg transition">Save Employee</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500 no-print">
+    PayLedger System • CSE Mini Project • Dynamic Linked List &amp; MySQL Integrated
+  </footer>
+
+  <!-- SYSTEM JAVASCRIPT LOGIC -->
+  <script>
+    // DATA STRUCTURE NODE DEFINITION
+    class EmployeeNode {
+      constructor(emp_id, name, designation, department, basic_salary) {
+        this.emp_id = parseInt(emp_id);
+        this.name = name;
+        this.designation = designation;
+        this.department = department;
+        this.basic_salary = parseFloat(basic_salary);
+        this.next = null; // Pointer to next node
+      }
+    }
+
+    // LINKED LIST IMPLEMENTATION
+    class EmployeeLinkedList {
+      constructor() {
+        this.head = null;
+        this.size = 0;
+      }
+
+      // Insertion at head O(1)
+      insert(emp_id, name, designation, department, basic_salary) {
+        // Prevent duplicates
+        if (this.find(emp_id)) {
+          alert(`Employee with ID ${emp_id} already exists!`);
+          return false;
+        }
+        const newNode = new EmployeeNode(emp_id, name, designation, department, basic_salary);
+        newNode.next = this.head;
+        this.head = newNode;
+        this.size++;
+        logSQL(`INSERT INTO employees VALUES (${emp_id}, '${name}', '${designation}', '${department}', ${basic_salary});`);
+        return true;
+      }
+
+      // Search Node
+      find(emp_id) {
+        let current = this.head;
+        while (current !== null) {
+          if (current.emp_id === parseInt(emp_id)) return current;
+          current = current.next;
+        }
+        return null;
+      }
+
+      // Delete Node
+      delete(emp_id) {
+        if (!this.head) return false;
+        if (this.head.emp_id === parseInt(emp_id)) {
+          this.head = this.head.next;
+          this.size--;
+          logSQL(`DELETE FROM employees WHERE emp_id = ${emp_id};`);
+          return true;
+        }
+        let current = this.head;
+        while (current.next !== null && current.next.emp_id !== parseInt(emp_id)) {
+          current = current.next;
+        }
+        if (current.next) {
+          current.next = current.next.next;
+          this.size--;
+          logSQL(`DELETE FROM employees WHERE emp_id = ${emp_id};`);
+          return true;
+        }
+        return false;
+      }
+
+      // Convert Linked List to Array for rendering/sorting
+      toArray() {
+        const arr = [];
+        let current = this.head;
+        while (current !== null) {
+          arr.push(current);
+          current = current.next;
+        }
+        return arr;
+      }
+    }
+
+    // GLOBAL SYSTEM STATE
+    const employeeList = new EmployeeLinkedList();
+    let payrollRecords = []; // Payroll logs stored in database table
+    let nextPayrollId = 1001;
+
+    // INITIALIZATION
+    window.onload = function() {
+      seedSampleData();
+    };
+
+    function seedSampleData() {
+      employeeList.head = null;
+      employeeList.size = 0;
+      payrollRecords = [];
+
+      employeeList.insert(101, "Arun Varma", "Senior Lead Engineer", "Engineering", 65000);
+      employeeList.insert(102, "Priya Sharma", "HR Manager", "Human Resources", 50000);
+      employeeList.insert(103, "Karthik Raja", "Frontend Developer", "Engineering", 42000);
+
+      // Seed initial payroll
+      processPayrollForEmp(101, 30, 10);
+      processPayrollForEmp(102, 28, 0);
+
+      refreshAllViews();
+      logSQL("-- System re-seeded with demo records");
+    }
+
+    // SALARY CALCULATION ALGORITHM
+    function calculateSalaryComponents(monthlyBasic, daysWorked, overtimeHours) {
+      const proRatedBasic = (monthlyBasic * daysWorked) / 30;
+      const hra = proRatedBasic * 0.40; // 40%
+      const da = proRatedBasic * 0.10;  // 10%
+      const hourlyRate = (monthlyBasic / 30) / 8;
+      const overtimePay = overtimeHours * hourlyRate * 2; // 2x multiplier
+
+      const grossEarnings = proRatedBasic + hra + da + overtimePay;
+
+      // Deductions
+      const pf = Math.min(proRatedBasic * 0.12, 1800); // 12% capped
+      const professionalTax = grossEarnings >= 15000 ? 200 : 0;
+      const tds = grossEarnings > 50000 ? grossEarnings * 0.05 : 0; // Simplified TDS
+
+      const totalDeductions = pf + professionalTax + tds;
+      const netPay = grossEarnings - totalDeductions;
+
+      return {
+        proRatedBasic, hra, da, overtimePay, grossEarnings,
+        pf, professionalTax, tds, totalDeductions, netPay
+      };
+    }
+
+    function processPayrollForEmp(emp_id, daysWorked, overtimeHours) {
+      const emp = employeeList.find(emp_id);
+      if (!emp) return;
+
+      const comp = calculateSalaryComponents(emp.basic_salary, daysWorked, overtimeHours);
+
+      const record = {
+        payroll_id: nextPayrollId++,
+        emp_id: emp.emp_id,
+        emp_name: emp.name,
+        designation: emp.designation,
+        department: emp.department,
+        daysWorked,
+        overtimeHours,
+        ...comp
+      };
+
+      payrollRecords.push(record);
+      logSQL(`INSERT INTO payroll_records VALUES (${record.payroll_id}, ${emp.emp_id}, ${record.grossEarnings.toFixed(2)}, ${record.totalDeductions.toFixed(2)}, ${record.netPay.toFixed(2)});`);
+    }
+
+    // UI REFRESH DISPATCHER
+    function refreshAllViews() {
+      renderDashboard();
+      renderEmployeeTable();
+      renderPayrollDropdowns();
+      calculatePayrollPreview();
+      renderLinkedListNodes();
+      renderDatabaseTables();
+      renderPayslipDropdown();
+    }
+
+    // TAB SWITCHING LOGIC
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-sky-400', 'bg-slate-800');
+        btn.classList.add('text-slate-300');
+      });
+
+      const activeBtn = document.getElementById(`nav-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.add('text-sky-400', 'bg-slate-800');
+        activeBtn.classList.remove('text-slate-300');
+      }
+
+      refreshAllViews();
+    }
+
+    // RENDER DASHBOARD
+    function renderDashboard() {
+      const employees = employeeList.toArray();
+      document.getElementById('kpi-headcount').innerText = employees.length;
+
+      let totalGross = 0, totalDeductions = 0, totalNet = 0;
+      payrollRecords.forEach(r => {
+        totalGross += r.grossEarnings;
+        totalDeductions += r.totalDeductions;
+        totalNet += r.netPay;
+      });
+
+      document.getElementById('kpi-gross').innerText = `₹${totalGross.toLocaleString('en-IN', {maximumFractionDigits:0})}`;
+      document.getElementById('kpi-deductions').innerText = `₹${totalDeductions.toLocaleString('en-IN', {maximumFractionDigits:0})}`;
+      document.getElementById('kpi-net').innerText = `₹${totalNet.toLocaleString('en-IN', {maximumFractionDigits:0})}`;
+
+      const tbody = document.getElementById('dashboard-employee-table');
+      tbody.innerHTML = '';
+      employees.forEach(emp => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-800/50 transition">
+            <td class="px-4 py-3 mono font-bold text-sky-400">#${emp.emp_id}</td>
+            <td class="px-4 py-3 font-semibold text-white">${emp.name}</td>
+            <td class="px-4 py-3 text-slate-400">${emp.designation}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-800 text-slate-300">${emp.department}</span></td>
+            <td class="px-4 py-3 mono font-semibold">₹${emp.basic_salary.toLocaleString('en-IN')}</td>
+            <td class="px-4 py-3 text-right">
+              <button onclick="switchTab('payroll')" class="text-xs text-sky-400 hover:underline">Run Payroll</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // RENDER EMPLOYEE TABLE
+    function renderEmployeeTable() {
+      const employees = employeeList.toArray();
+      document.getElementById('employee-count-badge').innerText = `Showing ${employees.length} employees`;
+
+      const tbody = document.getElementById('full-employee-table');
+      tbody.innerHTML = '';
+
+      if (employees.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No employee records found in Linked List.</td></tr>`;
+        return;
+      }
+
+      employees.forEach(emp => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-800/50 transition">
+            <td class="px-4 py-3 mono font-bold text-sky-400">#${emp.emp_id}</td>
+            <td class="px-4 py-3 font-semibold text-white">${emp.name}</td>
+            <td class="px-4 py-3 text-slate-400">${emp.designation}</td>
+            <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-800 text-slate-300">${emp.department}</span></td>
+            <td class="px-4 py-3 mono font-semibold">₹${emp.basic_salary.toLocaleString('en-IN')}</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="deleteEmployee(${emp.emp_id})" class="text-rose-400 hover:text-rose-300 text-xs font-semibold px-2 py-1 rounded bg-rose-500/10 border border-rose-500/20">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function toggleEmployeeModal() {
+      document.getElementById('employee-modal').classList.toggle('hidden');
+    }
+
+    function saveEmployee() {
+      const id = document.getElementById('form-emp-id').value;
+      const name = document.getElementById('form-emp-name').value;
+      const desig = document.getElementById('form-emp-desig').value;
+      const dept = document.getElementById('form-emp-dept').value;
+      const basic = document.getElementById('form-emp-basic').value;
+
+      if (!id || !name || !desig || !basic) {
+        alert("Please fill out all fields!");
+        return;
+      }
+
+      if (employeeList.insert(id, name, desig, dept, basic)) {
+        toggleEmployeeModal();
+        refreshAllViews();
+        document.getElementById('form-emp-id').value = '';
+        document.getElementById('form-emp-name').value = '';
+        document.getElementById('form-emp-desig').value = '';
+        document.getElementById('form-emp-basic').value = '';
+      }
+    }
+
+    function deleteEmployee(emp_id) {
+      if (confirm(`Are you sure you want to delete employee #${emp_id}?`)) {
+        employeeList.delete(emp_id);
+        refreshAllViews();
+      }
+    }
+
+    // PAYROLL CALCULATION & PREVIEW
+    function renderPayrollDropdowns() {
+      const select = document.getElementById('payroll-emp-select');
+      select.innerHTML = '';
+      const employees = employeeList.toArray();
+
+      employees.forEach(emp => {
+        select.innerHTML += `<option value="${emp.emp_id}">${emp.name} (#${emp.emp_id}) - ₹${emp.basic_salary}/mo</option>`;
+      });
+    }
+
+    function calculatePayrollPreview() {
+      const empId = document.getElementById('payroll-emp-select').value;
+      const days = parseFloat(document.getElementById('payroll-days').value) || 0;
+      const overtime = parseFloat(document.getElementById('payroll-overtime').value) || 0;
+
+      const emp = employeeList.find(empId);
+      if (!emp) return;
+
+      const comp = calculateSalaryComponents(emp.basic_salary, days, overtime);
+
+      document.getElementById('calc-basic').innerText = `₹${comp.proRatedBasic.toFixed(2)}`;
+      document.getElementById('calc-hra').innerText = `₹${comp.hra.toFixed(2)}`;
+      document.getElementById('calc-da').innerText = `₹${comp.da.toFixed(2)}`;
+      document.getElementById('calc-ot').innerText = `₹${comp.overtimePay.toFixed(2)}`;
+      document.getElementById('calc-gross').innerText = `₹${comp.grossEarnings.toFixed(2)}`;
+
+      document.getElementById('calc-pf').innerText = `₹${comp.pf.toFixed(2)}`;
+      document.getElementById('calc-ptax').innerText = `₹${comp.professionalTax.toFixed(2)}`;
+      document.getElementById('calc-tds').innerText = `₹${comp.tds.toFixed(2)}`;
+      document.getElementById('calc-deductions').innerText = `₹${comp.totalDeductions.toFixed(2)}`;
+
+      document.getElementById('calc-net').innerText = `₹${comp.netPay.toFixed(2)}`;
+    }
+
+    function savePayrollRecord() {
+      const empId = document.getElementById('payroll-emp-select').value;
+      const days = parseFloat(document.getElementById('payroll-days').value) || 0;
+      const overtime = parseFloat(document.getElementById('payroll-overtime').value) || 0;
+
+      processPayrollForEmp(empId, days, overtime);
+      refreshAllViews();
+      alert("Payroll record processed and committed to database successfully!");
+    }
+
+    // RENDER LINKED LIST DATA STRUCTURE VISUALIZER
+    function renderLinkedListNodes() {
+      const container = document.getElementById('linked-list-nodes-container');
+      container.innerHTML = '';
+
+      let current = employeeList.head;
+      if (!current) {
+        container.innerHTML = `<div class="text-xs text-slate-500 italic">Linked List is currently empty (HEAD -> NULL)</div>`;
+        return;
+      }
+
+      // Render Head Label
+      container.innerHTML += `<span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold rounded border border-emerald-500/30">HEAD</span>`;
+
+      while (current !== null) {
+        // Find if this node has a processed payroll net pay
+        const pRecord = payrollRecords.find(p => p.emp_id === current.emp_id);
+        const netPayStr = pRecord ? `₹${pRecord.netPay.toFixed(0)}` : 'N/A';
+
+        container.innerHTML += `
+          <div class="flex items-center gap-2">
+            <div class="bg-slate-950 border border-sky-500/40 rounded-xl p-3 min-w-[180px] shadow-lg">
+              <div class="flex justify-between items-center text-xs border-b border-slate-800 pb-1 mb-1">
+                <span class="mono text-sky-400 font-bold">Node #${current.emp_id}</span>
+                <span class="text-[10px] text-slate-500">Ptr: 0x${Math.floor(Math.random()*8999+1000)}</span>
+              </div>
+              <p class="text-xs font-bold text-white">${current.name}</p>
+              <p class="text-[11px] text-slate-400">Basic: ₹${current.basic_salary}</p>
+              <div class="mt-2 pt-1 border-t border-slate-800/80 flex justify-between items-center text-[11px]">
+                <span class="text-slate-500">Calculated Net:</span>
+                <span class="mono text-emerald-400 font-bold">${netPayStr}</span>
+              </div>
+            </div>
+            <i class="fa-solid fa-arrow-right text-sky-400 text-sm"></i>
+          </div>
+        `;
+        current = current.next;
+      }
+
+      container.innerHTML += `<span class="px-2 py-1 bg-rose-500/20 text-rose-400 font-mono text-xs font-bold rounded border border-rose-500/30">NULL</span>`;
+    }
+
+    // SORT LINKED LIST (Merge Sort Simulation)
+    function sortLinkedList(criteria) {
+      const arr = employeeList.toArray();
+
+      if (criteria === 'net_pay') {
+        arr.sort((a, b) => {
+          const pA = payrollRecords.find(p => p.emp_id === a.emp_id)?.netPay || 0;
+          const pB = payrollRecords.find(p => p.emp_id === b.emp_id)?.netPay || 0;
+          return pB - pA; // Descending order
+        });
+      } else if (criteria === 'emp_id') {
+        arr.sort((a, b) => a.emp_id - b.emp_id);
+      }
+
+      // Reconstruct Linked List pointers
+      employeeList.head = null;
+      for (let i = arr.length - 1; i >= 0; i--) {
+        arr[i].next = employeeList.head;
+        employeeList.head = arr[i];
+      }
+
+      renderLinkedListNodes();
+      logSQL(`-- Executed Merge Sort on Linked List nodes by criteria: ${criteria} (Time Complexity O(N log N))`);
+    }
+
+    // MYSQL SIMULATOR VIEWS
+    function renderDatabaseTables() {
+      const empTbody = document.getElementById('db-table-employees');
+      empTbody.innerHTML = '';
+      employeeList.toArray().forEach(e => {
+        empTbody.innerHTML += `
+          <tr>
+            <td class="px-3 py-2 text-sky-400 font-bold">${e.emp_id}</td>
+            <td class="px-3 py-2 text-white">${e.name}</td>
+            <td class="px-3 py-2 text-slate-400">${e.designation}</td>
+            <td class="px-3 py-2 text-emerald-400">${e.basic_salary.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+
+      const payTbody = document.getElementById('db-table-payroll');
+      payTbody.innerHTML = '';
+      payrollRecords.forEach(p => {
+        payTbody.innerHTML += `
+          <tr>
+            <td class="px-3 py-2 text-amber-400">${p.payroll_id}</td>
+            <td class="px-3 py-2 text-sky-400">${p.emp_id}</td>
+            <td class="px-3 py-2 text-white">${p.grossEarnings.toFixed(2)}</td>
+            <td class="px-3 py-2 text-rose-400">${p.totalDeductions.toFixed(2)}</td>
+            <td class="px-3 py-2 text-emerald-400 font-bold">${p.netPay.toFixed(2)}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function logSQL(query) {
+      const consoleLog = document.getElementById('sql-log');
+      const time = new Date().toLocaleTimeString();
+      consoleLog.innerHTML = `<div><span class="text-slate-500">[${time}]</span> ${query}</div>` + consoleLog.innerHTML;
+    }
+
+    // PAYSLIP RENDER
+    function renderPayslipDropdown() {
+      const select = document.getElementById('payslip-record-select');
+      select.innerHTML = '';
+      if (payrollRecords.length === 0) {
+        select.innerHTML = `<option>No payroll records committed</option>`;
+        return;
+      }
+      payrollRecords.forEach(p => {
+        select.innerHTML += `<option value="${p.payroll_id}">#PAY-${p.payroll_id} - ${p.emp_name} (₹${p.netPay.toFixed(0)})</option>`;
+      });
+      renderPayslip();
+    }
+
+    function renderPayslip() {
+      const id = document.getElementById('payslip-record-select').value;
+      const record = payrollRecords.find(p => p.payroll_id == id);
+      if (!record) return;
+
+      document.getElementById('ps-id').innerText = `PAYSLIP ID: #PAY-${record.payroll_id}`;
+      document.getElementById('ps-emp-name').innerText = record.emp_name;
+      document.getElementById('ps-emp-id').innerText = `#EMP-${record.emp_id}`;
+      document.getElementById('ps-emp-desig').innerText = record.designation;
+      document.getElementById('ps-emp-dept').innerText = record.department;
+
+      document.getElementById('ps-basic').innerText = `₹${record.proRatedBasic.toFixed(2)}`;
+      document.getElementById('ps-hra').innerText = `₹${record.hra.toFixed(2)}`;
+      document.getElementById('ps-da').innerText = `₹${record.da.toFixed(2)}`;
+      document.getElementById('ps-ot').innerText = `₹${record.overtimePay.toFixed(2)}`;
+      document.getElementById('ps-gross').innerText = `₹${record.grossEarnings.toFixed(2)}`;
+
+      document.getElementById('ps-pf').innerText = `₹${record.pf.toFixed(2)}`;
+      document.getElementById('ps-ptax').innerText = `₹${record.professionalTax.toFixed(2)}`;
+      document.getElementById('ps-tds').innerText = `₹${record.tds.toFixed(2)}`;
+      document.getElementById('ps-deductions').innerText = `₹${record.totalDeductions.toFixed(2)}`;
+
+      document.getElementById('ps-net-amount').innerText = `₹${record.netPay.toFixed(2)}`;
+      document.getElementById('ps-net-words').innerText = `Amount in words: ${numberToWords(Math.round(record.netPay))} Rupees Only`;
+    }
+
+    // Helper: Number to Words Converter
+    function numberToWords(num) {
+      const a = ['','one ','two ','three ','four ','five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
+      const b = ['', '', 'twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+      if ((num = num.toString()).length > 9) return 'overflow';
+      let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+      if (!n) return ''; 
+      let str = '';
+      str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'crore ' : '';
+      str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'lakh ' : '';
+      str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'thousand ' : '';
+      str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'hundred ' : '';
+      str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+      return str.trim().toUpperCase();
+    }
+  </script>
+</body>
+</html>
